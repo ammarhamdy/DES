@@ -5,16 +5,27 @@ import csv
 
 class KeyGenerator:
     def __init__(self, pc1_csv_path: str, pc2_csv_path: str, shifts_csv_path: str):
-        # load pc-1 matrix.
+        # load pc-1 matrix(8X7).
         self.pc1 = list(csv.reader(open(pc1_csv_path)))
-        # load pc-2 matrix.
+        # load pc-2 matrix(8X6).
         self.pc2 = list(csv.reader(open(pc2_csv_path)))
-        # load number of shifts.
+        # load number of shifts(16 value).
         self.number_of_shifts = list(csv.reader(open(shifts_csv_path)))
         # is passed parity check.
         self.passed_parity_check: bool = True
 
     def sub_keys_of(self, key):
+        """
+        1. takes key 64 bits(binary).
+        2. apply pc-1 return 56 bits.
+        3. split key to C0, D0 28bits.
+        4. rotate C0, D0 return C1, D1.
+        5. C1+''+D1 = sub key1.
+        6. apply pc-2 to sub key1 return 48bits.
+        7. save sub key1.
+        8. C1 = rotate(C1), D1 = rotate(D1).
+        9. return to step 5.
+        """
         blocks: list = [None, None, None, None, None, None, None, None]
         for i in range(8):
             # store blocks
@@ -54,6 +65,7 @@ class KeyGenerator:
 
 
 if __name__ == '__main__':
+    # test...
     # keyGenerator = KeyGenerator('..\\data\\pc-1.csv', '..\\data\\pc-2.csv', '..\\data\\number of left shifts.csv')
     # keys = keyGenerator.sub_keys_of('0001001100110100010101110111100110011011101111001101111111110001')
     # for itk in keys:

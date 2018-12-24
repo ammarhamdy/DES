@@ -11,9 +11,9 @@ def xor(a: str, b: str):
 
 class DataGenerator:
     def __init__(self, e_path: str, s_box_dir_path: str, p_path: str):
-        # load bit selection matrix.
+        # load bit selection matrix(8X6).
         self.e = list(csv.reader(open(e_path)))
-        # load s_box directory.
+        # load s_box directory each s-box(4X16).
         names: list = os.listdir(s_box_dir_path)
         self.s_boxes: list = \
             [list(csv.reader(open(s_box_dir_path + '\\' + names[0]))),
@@ -24,10 +24,11 @@ class DataGenerator:
              list(csv.reader(open(s_box_dir_path + '\\' + names[5]))),
              list(csv.reader(open(s_box_dir_path + '\\' + names[6]))),
              list(csv.reader(open(s_box_dir_path + '\\' + names[7])))]
-        # load permutation matrix.
+        # load permutation matrix(8X4).
         self.p = list(csv.reader(open(p_path)))
 
     def expand(self, right: str):
+        """apply matrix e; from 32bits return 48bits"""
         expanded = str()
         for sub_list in self.e:
             for item in sub_list:
@@ -44,7 +45,7 @@ class DataGenerator:
         return reduction_bits
 
     def mangler_function(self, right: str, key: str):
-        """apply matrix P(8x4)"""
+        """apply matrix P return 32bits"""
         r_xor_k = self.reduction_of(xor(self.expand(right), key))
         p_r_xor_k = str()
         for sub_list in self.p:
@@ -53,18 +54,18 @@ class DataGenerator:
         return p_r_xor_k
 
     def round16_of(self, left0: str, right0: str, keys: list):
+        """return data left16, right16."""
         l0, r0 = left0, right0
         for i in range(16):
-            l = r0
-            r = xor(l0, self.mangler_function(r0, keys[i]))
-            r0 = r
-            l0 = l
+            left = r0
+            right = xor(l0, self.mangler_function(r0, keys[i]))
+            r0, l0 = right, left
         return l0, r0
 
 
 if __name__ == '__main__':
     # test...
-    dataGenerator = DataGenerator('..\\data\\bit selection.csv', '..\\data\\sbox', '..\\data\\P.csv')
+    # dataGenerator = DataGenerator('..\\data\\bit selection.csv', '..\\data\\sbox', '..\\data\\P.csv')
     # e = dataGenerator.expand('11110000101010101111000010101010')
     # print(e == '011110100001010101010101011110100001010101010101')
 
