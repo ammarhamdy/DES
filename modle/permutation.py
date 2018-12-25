@@ -1,6 +1,10 @@
 import csv
 
 
+def binary(hexadecimal: str):
+    return ''.join([str(bin(int(i, 16))[2:]).rjust(4, '0') for i in hexadecimal])
+
+
 class Permutation:
     def __init__(self, ip_path: str, rip_path: str):
         # load initial permutation matrix.
@@ -8,15 +12,17 @@ class Permutation:
         # load revers initial permutation matrix.
         self.rip = list(csv.reader(open(rip_path)))
 
-    def initial_permutation_of(self, data: str):
-        """takes data 64bits(binary) return 64bits"""
+    def initial_permutation(self, data: str):
+        """takes data 16 bits(hex) --> 64 bits(binary) return 64bits"""
+        # convert data from hex to binary.
+        data = binary(data)
         ip_data = str()
         for sub_list in self.ip:
             for item in sub_list:
                 ip_data += data[int(item) - 1]
         return ip_data
 
-    def revers_initial_permutation_of(self, data: str):
+    def revers_initial_permutation(self, data: str):
         """takes data 64bits(binary) return 64bits"""
         rip_data = str()
         for sub_list in self.rip:

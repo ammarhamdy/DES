@@ -35,7 +35,7 @@ class DataGenerator:
                 expanded += right[int(item) - 1]
         return expanded
 
-    def reduction_of(self, bits: str):
+    def reduction(self, bits: str):
         """split 48bits(8*6) in to 32bit(8*4), apply SBox to each block"""
         reduction_bits = str()
         for i in range(8):
@@ -46,19 +46,19 @@ class DataGenerator:
 
     def mangler_function(self, right: str, key: str):
         """apply matrix P return 32bits"""
-        r_xor_k = self.reduction_of(xor(self.expand(right), key))
+        r_xor_k = self.reduction(xor(self.expand(right), key))
         p_r_xor_k = str()
         for sub_list in self.p:
             for item in sub_list:
                 p_r_xor_k += r_xor_k[int(item) - 1]
         return p_r_xor_k
 
-    def round16_of(self, left0: str, right0: str, keys: list):
+    def round16(self, left0: str, right0: str, key_generator):
         """return data left16, right16."""
         l0, r0 = left0, right0
         for i in range(16):
             left = r0
-            right = xor(l0, self.mangler_function(r0, keys[i]))
+            right = xor(l0, self.mangler_function(r0, key_generator.next_sub_key()))
             r0, l0 = right, left
         return l0, r0
 

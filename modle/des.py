@@ -3,8 +3,8 @@ from .keyGenerator import KeyGenerator
 from .permutation import Permutation
 
 
-def convert_to_binary(hexadecimal: str):
-    return ''.join([str(bin(int(i, 16))[2:]).rjust(4, '0') for i in hexadecimal])
+def hexadecimal(cipher: str):
+    return ''.join([hex(int(cipher[i * 4: (i + 1) * 4], 2))[2:] for i in range(len(cipher) // 4)])
 
 
 class DES:
@@ -16,24 +16,19 @@ class DES:
         self.permutation = Permutation(ip_path, rip_path)
 
     def encrypt(self, data: str, key: str):
-        # convert key from hex to binary.
-        bin_key: str = convert_to_binary(key)
         # generate keys.
-        keys: list = self.keyGenerator.sub_keys_of(bin_key)
-        # convert data from hex to binary.
-        bin_data = convert_to_binary(data)
+        self.keyGenerator.set_key(key)
         # apply initial permutation.
-        bin_data = self.permutation.initial_permutation_of(bin_data)
+        bin_data = self.permutation.initial_permutation(data)
         l0, r0 = bin_data[0:32], bin_data[32:]
         # get data after 16 round.
-        l16r16: tuple = self.dataGenerator.round16_of(l0, r0, keys)
+        data16: tuple = self.dataGenerator.round16(l0, r0, self.keyGenerator)
         # swap.
-        bin_data = ''.join(l16r16[1]) + ''.join(l16r16[0])
+        bin_data = ''.join(data16[1]) + ''.join(data16[0])
         # apply revers initial permutation.
-        cipher: str = self.permutation.revers_initial_permutation_of(bin_data)
-        # convert cipher from binary to hex.
-        hex_cipher = ''.join([hex(int(cipher[i * 4: (i + 1) * 4], 2))[2:] for i in range(len(cipher) // 4)])
-        return hex_cipher.upper()
+        cipher: str = self.permutation.revers_initial_permutation(bin_data)
+        # convert cipher from binary to hex in upper case.
+        return hexadecimal(cipher).upper()
 
     def key_status(self):
         return 'strong key'*self.keyGenerator.is_strong_key() + 'week key'*(not self.keyGenerator.is_strong_key())
